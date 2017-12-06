@@ -5,21 +5,156 @@ output:
     keep_md: true
 ---
 
+## Get necessary packages
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# load packages
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
 
 ## Loading and preprocessing the data
 
+First step to read in dataset and check a few rows.
 
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# read data
+fitbit <- read_csv("activity.csv", col_names=TRUE)
+
+# check data table for correct classes and clean read
+head(fitbit)
+```
+
+Data appears to be tidy and variable classes are good to go.
 
 ## What is mean total number of steps taken per day?
 
+__1. Calculate the total number of steps taken per day__
 
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# group data by date and get total number of steps per day, then the mean
+daily_total_steps <- fitbit%>%
+  group_by(date)%>%
+  summarize(total=sum(steps, na.rm=TRUE))
+```
+
+
+__2. Make a histogram of the total number of steps taken each day__
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# plot histogram of daily totals
+hist(daily_total_steps$total, 
+     main="Daily Steps - Frequency of Totals",
+     xlab="Total Daily Steps",
+     breaks=20)
+
+```
+
+__3. Calculate and report the mean and median of the total number of steps taken per day__
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# get mean number of steps
+mean(daily_total_steps$total, na.rm = TRUE)
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# get median number of steps
+median(daily_total_steps$total, na.rm = TRUE)
+```
 
 ## What is the average daily activity pattern?
 
+__1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).__
 
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# group data by date and get avg number of steps interval
+avg_steps_per_interval <- fitbit%>%
+  group_by(interval)%>%
+  summarize(avg_steps=mean(steps, na.rm = TRUE))
+
+head(avg_steps_per_interval)
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# line plot of avg_steps per interval by interval
+plot(x=avg_steps_per_interval$interval, 
+     y=avg_steps_per_interval$avg_steps,
+     main="Average Steps by Interval by Interval",
+     xlab="Interval", ylab="Avg Steps by Interval",
+     type="l")
+
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# get interval with max average steps 
+idx <- which(avg_steps_per_interval$avg_steps==
+               max(avg_steps_per_interval$avg_steps))
+
+avg_steps_per_interval[104, "interval"][[1]]
+
+```
 
 ## Imputing missing values
 
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# calculate number of rows with NA's
+sum(is.na(fitbit$steps))
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# impute missing data using mean number of steps for intervals
+fitbit <- merge(fitbit, avg_steps_per_interval, by="interval")
+idx <- which(is.na(fitbit$steps))
+fitbit[idx, "steps"] <- fitbit[idx, "avg_steps"]
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# group data by date and get total number of steps per day, then the mean
+daily_total_steps2 <- fitbit%>%
+  group_by(date)%>%
+  summarize(total=sum(steps, na.rm=TRUE))
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# plot histogram of daily totals
+hist(daily_total_steps2$total, 
+     main="Daily Steps - Frequency of Totals",
+     xlab="Total Daily Steps",
+     breaks=20)
+
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# get mean number of steps
+mean(daily_total_steps2$total, na.rm = TRUE)
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# get median number of steps
+median(daily_total_steps2$total, na.rm = TRUE)
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# create factor variable - levels = c("weekday", "weekend")
+f_weekend <- function(d){ifelse(weekdays(d) %in% c("Saturday", "Sunday"),
+                                "weekend", "weekday")}
+fitbit$weekend <- sapply(fitbit$date, f_weekend)
+                         
+```
+
+```{r echo=TRUE, warning=FALSE, error=FALSE}
+# group by interval and get means by interval
+avg_steps_per_interval2 <- fitbit%>%
+  group_by(interval, weekend)%>%
+  summarize(avg_steps=mean(steps))
+
+# plot line graphs
+qplot(interval, avg_steps, data=avg_steps_per_interval2, geom="line") +
+  facet_wrap(~weekend, nrow = 2, ncol = 1) + theme_light()
+
+```
+
