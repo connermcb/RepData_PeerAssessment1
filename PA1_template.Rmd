@@ -86,6 +86,8 @@ plot(x=avg_steps_per_interval$interval,
 
 ```
 
+__2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?__
+
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # get interval with max average steps 
 idx <- which(avg_steps_per_interval$avg_steps==
@@ -96,11 +98,18 @@ avg_steps_per_interval[104, "interval"][[1]]
 ```
 
 ## Imputing missing values
+__1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs).__
+
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # calculate number of rows with NA's
 sum(is.na(fitbit$steps))
 ```
+
+__2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.__
+
+__3. Create a new dataset that is equal to the original dataset but with the missing data filled in.__
+
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # impute missing data using mean number of steps for intervals
@@ -108,6 +117,8 @@ fitbit <- merge(fitbit, avg_steps_per_interval, by="interval")
 idx <- which(is.na(fitbit$steps))
 fitbit[idx, "steps"] <- fitbit[idx, "avg_steps"]
 ```
+
+__4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.__
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # group data by date and get total number of steps per day, then the mean
@@ -125,6 +136,8 @@ hist(daily_total_steps2$total,
 
 ```
 
+__Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?__
+
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # get mean number of steps
 mean(daily_total_steps2$total, na.rm = TRUE)
@@ -138,6 +151,8 @@ median(daily_total_steps2$total, na.rm = TRUE)
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+__1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.__
+
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # create factor variable - levels = c("weekday", "weekend")
 f_weekend <- function(d){ifelse(weekdays(d) %in% c("Saturday", "Sunday"),
@@ -145,6 +160,8 @@ f_weekend <- function(d){ifelse(weekdays(d) %in% c("Saturday", "Sunday"),
 fitbit$weekend <- sapply(fitbit$date, f_weekend)
                          
 ```
+
+__2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).__
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE}
 # group by interval and get means by interval
