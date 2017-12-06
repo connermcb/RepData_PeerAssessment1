@@ -12,26 +12,6 @@ output:
 # load packages
 library(readr)
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(ggplot2)
 ```
 
@@ -43,18 +23,7 @@ First step to read in dataset and check a few rows.
 ```r
 # read data
 fitbit <- read_csv("activity.csv", col_names=TRUE)
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   steps = col_integer(),
-##   date = col_date(format = ""),
-##   interval = col_integer()
-## )
-```
-
-```r
 # check data table for correct classes and clean read
 head(fitbit)
 ```
@@ -83,6 +52,20 @@ __1. Calculate the total number of steps taken per day__
 daily_total_steps <- fitbit%>%
   group_by(date)%>%
   summarize(total=sum(steps, na.rm=TRUE))
+
+head(daily_total_steps)
+```
+
+```
+## # A tibble: 6 x 2
+##         date total
+##       <date> <int>
+## 1 2012-10-01     0
+## 2 2012-10-02   126
+## 3 2012-10-03 11352
+## 4 2012-10-04 12116
+## 5 2012-10-05 13294
+## 6 2012-10-06 15420
 ```
 
 
@@ -104,12 +87,11 @@ __3. Calculate and report the mean and median of the total number of steps taken
 
 ```r
 # get mean number of steps
-mean(daily_total_steps$total, na.rm = TRUE)
+mean1 <- mean(daily_total_steps$total, na.rm = TRUE)
 ```
 
-```
-## [1] 9354.23
-```
+The mean of the daily total of steps is __9354.23 steps__.
+
 
 
 ```r

@@ -37,6 +37,8 @@ __1. Calculate the total number of steps taken per day__
 daily_total_steps <- fitbit%>%
   group_by(date)%>%
   summarize(total=sum(steps, na.rm=TRUE))
+
+head(daily_total_steps)
 ```
 
 
@@ -55,13 +57,19 @@ __3. Calculate and report the mean and median of the total number of steps taken
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 # get mean number of steps
-mean(daily_total_steps$total, na.rm = TRUE)
+mean1 <- mean(daily_total_steps$total, na.rm = TRUE)
 ```
+
+The mean of the daily total of steps is __`r round(mean1, 2)` steps__.
+
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 # get median number of steps
-median(daily_total_steps$total, na.rm = TRUE)
+median1 <- median(daily_total_steps$total, na.rm = TRUE)
 ```
+
+The median of the daily total of steps is __`r round(median1, 2)` steps__.
+
 
 ## What is the average daily activity pattern?
 
@@ -93,9 +101,12 @@ __2. Which 5-minute interval, on average across all the days in the dataset, con
 idx <- which(avg_steps_per_interval$avg_steps==
                max(avg_steps_per_interval$avg_steps))
 
-avg_steps_per_interval[104, "interval"][[1]]
+intrvl <- avg_steps_per_interval[104, "interval"][[1]]
 
 ```
+
+On average across all the days, interval `r intrvl` contains the maximum number of days.
+
 
 ## Imputing missing values
 __1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs).__
@@ -103,8 +114,10 @@ __1. Calculate and report the total number of missing values in the dataset (i.e
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 # calculate number of rows with NA's
-sum(is.na(fitbit$steps))
+total_nas <- sum(is.na(fitbit$steps))
 ```
+
+The total number of NA's is `r total_nas`.
 
 __2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.__
 
@@ -116,6 +129,8 @@ __3. Create a new dataset that is equal to the original dataset but with the mis
 fitbit <- merge(fitbit, avg_steps_per_interval, by="interval")
 idx <- which(is.na(fitbit$steps))
 fitbit[idx, "steps"] <- fitbit[idx, "avg_steps"]
+
+sum(is.na(fitbit$steps))
 ```
 
 __4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.__
@@ -140,13 +155,17 @@ __Do these values differ from the estimates from the first part of the assignmen
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 # get mean number of steps
-mean(daily_total_steps2$total, na.rm = TRUE)
+mean2 <- mean(daily_total_steps2$total, na.rm = TRUE)
 ```
+
+Yes they do differ from the previous estimates. There is an absolute difference of `r abs(mean2-mean1)`. One impact of imputing the missing data is that the total and mean number of steps taken daily increased. Another impact is that the data now has near normal distribution as evidenced by the mean and median being equal.
 
 ```{r echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 # get median number of steps
-median(daily_total_steps2$total, na.rm = TRUE)
+median2 <- median(daily_total_steps2$total, na.rm = TRUE)
 ```
+
+The difference in the medians is less pronounced than the difference in means. Previously the median was `r median1` and now after imputing the missing values it is `r median2`, an absolute difference of `r abs(median2-median1)`
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -175,3 +194,4 @@ qplot(interval, avg_steps, data=avg_steps_per_interval2, geom="line") +
 
 ```
 
+Yes, there are difference. Weekdays show a sharp spike in the number of steps early in the day followed by average totals a little higher than 50 for the rest of the day. Weekends show a more uniform distribution but higher average totals throughout the day compared with weekdays.
